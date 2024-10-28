@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cargar Archivo</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+<body>
+    {% include 'navbar.html' %}
+
+    <div id="uploadContainer">
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <label for="fileInput">Selecciona un archivo XML:</label>
+            <input type="file" id="fileInput" name="archivo" accept=".xml" required>
+            <button type="submit" id="analyzeButton">Analizar</button>
+        </form>
+    </div>
+
+    <div id="resultContainer">
+        <p>{{ mensaje }}</p>
+        
+        {% if contenido_archivo %}
+            <h3>Contenido del Archivo XML:</h3>
+            <textarea id="fileContent" placeholder="Aquí se mostrará el contenido del archivo" readonly >
+{{ contenido_archivo }}
+            </textarea>
+        {% endif %}
+    </div>
+</body>
+</html>

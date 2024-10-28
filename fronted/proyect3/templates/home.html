@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio</title>
+    {% load static %}  <!-- Cargar archivos estáticos -->
+    <link rel="stylesheet" href="{% static 'style.css' %}">  <!-- Enlazar CSS -->
+</head>
+<body>
+    {% include 'navbar.html' %}
+    <h1>Bienvenido al Analizador de Mensajes</h1>
+    <p>Este es un sistema de ejemplo usando Django.</p>
+</body>
+</html>
