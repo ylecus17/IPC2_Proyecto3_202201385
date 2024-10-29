@@ -118,3 +118,33 @@ p {
     border-radius: 10px; 
     padding-left: 10px;
 }
+#button-pet {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+    padding: 20px;
+    background-color: #6c94bd;
+}
+
+#button-pet .action-button {
+    width: 250px;
+    padding: 15px 20px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #ffffff;
+    background-color: #4CAF50;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+#button-pet .action-button:hover {
+    background-color: #45a049;
+    transform: scale(1.05);
+}
+
+#button-pet .action-button:active {
+    background-color: #3e8e41;
+}

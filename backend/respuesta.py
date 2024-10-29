@@ -366,3 +366,209 @@ def filtrar_por_fecha_y_empresa(fechaF, empresaN):
 
     return ET.ElementTree(root)
 
+
+def filtrar_por_rango_fechas(fecha_inicio, fecha_fin):
+    fecha_inicio_convertida = convertir_fecha(fecha_inicio)  # Convertir la fecha de inicio
+    fecha_fin_convertida = convertir_fecha(fecha_fin)  # Convertir la fecha de fin
+
+    # Crear un defaultdict para agrupar los mensajes
+    agrupado_por_empresa = defaultdict(lambda: {"total": 0, "positivos": 0, "negativos": 0, "neutros": 0})
+    mensajes_en_rango = []  # Lista para almacenar mensajes dentro del rango específico
+
+    # Filtrar mensajes por el rango de fechas especificado
+    for mensaje in globales.mensajes:
+        fecha_mensaje_convertida = convertir_fecha(mensaje.fecha)
+        if fecha_inicio_convertida <= fecha_mensaje_convertida <= fecha_fin_convertida:
+            mensajes_en_rango.append(mensaje)
+
+    root = ET.Element("lista_respuestas")
+    total_mensajes = len(mensajes_en_rango)
+    contador_positivos_total = 0
+    contador_negativos_total = 0
+    contador_neutros_total = 0
+    mensajes_empresa = defaultdict(list)
+
+    # Si no se encontraron mensajes, agregar un mensaje al XML
+    if total_mensajes == 0:
+        respuesta_elem = ET.SubElement(root, "respuesta")
+        ET.SubElement(respuesta_elem, "rango").text = f"{fecha_inicio} a {fecha_fin}"
+        ET.SubElement(respuesta_elem, "mensaje").text = "No se encontraron coincidencias en el rango de fechas"
+        return ET.ElementTree(root)
+
+    # Agregar las fechas de los mensajes encontrados
+    fechas_mensajes = set()
+    for mensaje in mensajes_en_rango:
+        fechas_mensajes.add(mensaje.fecha)
+
+    for mensaje in mensajes_en_rango:
+        clasificacion = clasificar_mensaje(mensaje, globales.positivos, globales.negativos)
+        if clasificacion == "positivo":
+            contador_positivos_total += 1
+        elif clasificacion == "negativo":
+            contador_negativos_total += 1
+        else:
+            contador_neutros_total += 1
+
+        # Buscar coincidencias con empresas
+        for empresa in globales.empresas:
+            if empresa.nombre.lower() in mensaje.contenido.lower():
+                mensajes_empresa[empresa.nombre].append(mensaje)
+                break
+
+    # Agregar información del rango de fechas al XML
+    respuesta_elem = ET.SubElement(root, "respuesta")
+    ET.SubElement(respuesta_elem, "rango").text = f"{fecha_inicio} a {fecha_fin}"
+    mensajes_elem = ET.SubElement(respuesta_elem, "mensajes")
+    ET.SubElement(mensajes_elem, "total").text = str(total_mensajes)
+    ET.SubElement(mensajes_elem, "positivos").text = str(contador_positivos_total)
+    ET.SubElement(mensajes_elem, "negativos").text = str(contador_negativos_total)
+    ET.SubElement(mensajes_elem, "neutros").text = str(contador_neutros_total)
+
+    # Agregar análisis por empresa
+    analisis_elem = ET.SubElement(respuesta_elem, "analisis")
+
+    for nombre_empresa, mensajes in mensajes_empresa.items():
+        contador_positivos_empresa = 0
+        contador_negativos_empresa = 0
+        contador_neutros_empresa = 0
+        mensajes_servicio = defaultdict(lambda: {"total": 0, "positivos": 0, "negativos": 0, "neutros": 0})
+
+        for mensaje in mensajes:
+            clasificacion = clasificar_mensaje(mensaje, globales.positivos, globales.negativos)
+            if clasificacion == "positivo":
+                contador_positivos_empresa += 1
+            elif clasificacion == "negativo":
+                contador_negativos_empresa += 1
+            else:
+                contador_neutros_empresa += 1
+
+            # Clasificar por servicios
+            for servicio in [s for e in globales.empresas if e.nombre == nombre_empresa for s in e.servicios]:
+                if servicio.nombre.lower() in mensaje.contenido.lower() or any(alias.lower() in mensaje.contenido.lower() for alias in servicio.alias):
+                    mensajes_servicio[servicio.nombre]["total"] += 1
+                    if clasificacion == "positivo":
+                        mensajes_servicio[servicio.nombre]["positivos"] += 1
+                    elif clasificacion == "negativo":
+                        mensajes_servicio[servicio.nombre]["negativos"] += 1
+                    else:
+                        mensajes_servicio[servicio.nombre]["neutros"] += 1
+                    break
+
+        # Crear elemento para la empresa en el XML
+        empresa_elem = ET.SubElement(analisis_elem, "empresa", nombre=nombre_empresa)
+        mensajes_empresa_elem = ET.SubElement(empresa_elem, "mensajes")
+        ET.SubElement(mensajes_empresa_elem, "total").text = str(len(mensajes))
+        ET.SubElement(mensajes_empresa_elem, "positivos").text = str(contador_positivos_empresa)
+        ET.SubElement(mensajes_empresa_elem, "negativos").text = str(contador_negativos_empresa)
+        ET.SubElement(mensajes_empresa_elem, "neutros").text = str(contador_neutros_empresa)
+
+        # Agregar análisis por servicios
+        servicios_elem = ET.SubElement(empresa_elem, "servicios")
+        for nombre_servicio, data in mensajes_servicio.items():
+            servicio_elem = ET.SubElement(servicios_elem, "servicio", nombre=nombre_servicio)
+            mensajes_servicio_elem = ET.SubElement(servicio_elem, "mensajes")
+            ET.SubElement(mensajes_servicio_elem, "total").text = str(data["total"])
+            ET.SubElement(mensajes_servicio_elem, "positivos").text = str(data["positivos"])
+            ET.SubElement(mensajes_servicio_elem, "negativos").text = str(data["negativos"])
+            ET.SubElement(mensajes_servicio_elem, "neutros").text = str(data["neutros"])
+
+    return ET.ElementTree(root)
+def filtrar_por_rango_fechas_y_empresa(fecha_inicio, fecha_fin, empresa_nombre):
+    fecha_inicio_convertida = convertir_fecha(fecha_inicio)
+    fecha_fin_convertida = convertir_fecha(fecha_fin)
+    
+    # Crear un defaultdict para agrupar los mensajes
+    agrupado_por_empresa = defaultdict(lambda: {"total": 0, "positivos": 0, "negativos": 0, "neutros": 0})
+    mensajes_en_rango = []  # Lista para almacenar mensajes dentro del rango
+
+    # Filtrar mensajes por el rango de fechas especificado
+    for mensaje in globales.mensajes:
+        fecha_mensaje_convertida = convertir_fecha(mensaje.fecha)
+        if fecha_inicio_convertida <= fecha_mensaje_convertida <= fecha_fin_convertida:  # Comparar fechas
+            mensajes_en_rango.append(mensaje)
+
+    root = ET.Element("lista_respuestas")
+    total_mensajes = len(mensajes_en_rango)
+    contador_positivos_total = 0
+    contador_negativos_total = 0
+    contador_neutros_total = 0
+    mensajes_empresa = defaultdict(list)
+
+    # Si no se encontraron mensajes, agregar un mensaje al XML
+    if total_mensajes == 0:
+        fecha_elem = ET.SubElement(root, "respuesta")
+        ET.SubElement(fecha_elem, "fecha").text = f"Del {fecha_inicio} al {fecha_fin}"
+        ET.SubElement(fecha_elem, "mensaje").text = "No se encontraron coincidencias"
+        return ET.ElementTree(root)
+
+    for mensaje in mensajes_en_rango:
+        clasificacion = clasificar_mensaje(mensaje, globales.positivos, globales.negativos)
+        if clasificacion == "positivo":
+            contador_positivos_total += 1
+        elif clasificacion == "negativo":
+            contador_negativos_total += 1
+        else:
+            contador_neutros_total += 1
+
+        # Filtrar por empresa si se especifica
+        if empresa_nombre and empresa_nombre.lower() in mensaje.contenido.lower():
+            mensajes_empresa[empresa_nombre].append(mensaje)
+
+    # Agregar información del rango al XML
+    fecha_elem = ET.SubElement(root, "respuesta")
+    ET.SubElement(fecha_elem, "rango_fechas").text = f"Del {fecha_inicio} al {fecha_fin}"
+    mensajes_elem = ET.SubElement(fecha_elem, "mensajes")
+    ET.SubElement(mensajes_elem, "total").text = str(total_mensajes)
+    ET.SubElement(mensajes_elem, "positivos").text = str(contador_positivos_total)
+    ET.SubElement(mensajes_elem, "negativos").text = str(contador_negativos_total)
+    ET.SubElement(mensajes_elem, "neutros").text = str(contador_neutros_total)
+
+    # Agregar análisis por empresa
+    analisis_elem = ET.SubElement(fecha_elem, "analisis")
+
+    for nombre_empresa, mensajes in mensajes_empresa.items():
+        contador_positivos_empresa = 0
+        contador_negativos_empresa = 0
+        contador_neutros_empresa = 0
+        mensajes_servicio = defaultdict(lambda: {"total": 0, "positivos": 0, "negativos": 0, "neutros": 0})
+
+        for mensaje in mensajes:
+            clasificacion = clasificar_mensaje(mensaje, globales.positivos, globales.negativos)
+            if clasificacion == "positivo":
+                contador_positivos_empresa += 1
+            elif clasificacion == "negativo":
+                contador_negativos_empresa += 1
+            else:
+                contador_neutros_empresa += 1
+
+            # Clasificar por servicios
+            for servicio in [s for e in globales.empresas if e.nombre.lower() == nombre_empresa.lower() for s in e.servicios]:
+                if servicio.nombre.lower() in mensaje.contenido.lower() or any(alias.lower() in mensaje.contenido.lower() for alias in servicio.alias):
+                    mensajes_servicio[servicio.nombre]["total"] += 1
+                    if clasificacion == "positivo":
+                        mensajes_servicio[servicio.nombre]["positivos"] += 1
+                    elif clasificacion == "negativo":
+                        mensajes_servicio[servicio.nombre]["negativos"] += 1
+                    else:
+                        mensajes_servicio[servicio.nombre]["neutros"] += 1
+                    break
+
+        # Crear elemento para la empresa en el XML
+        empresa_elem = ET.SubElement(analisis_elem, "empresa", nombre=nombre_empresa)
+        mensajes_empresa_elem = ET.SubElement(empresa_elem, "mensajes")
+        ET.SubElement(mensajes_empresa_elem, "total").text = str(len(mensajes))
+        ET.SubElement(mensajes_empresa_elem, "positivos").text = str(contador_positivos_empresa)
+        ET.SubElement(mensajes_empresa_elem, "negativos").text = str(contador_negativos_empresa)
+        ET.SubElement(mensajes_empresa_elem, "neutros").text = str(contador_neutros_empresa)
+
+        # Agregar análisis por servicios
+        servicios_elem = ET.SubElement(empresa_elem, "servicios")
+        for nombre_servicio, data in mensajes_servicio.items():
+            servicio_elem = ET.SubElement(servicios_elem, "servicio", nombre=nombre_servicio)
+            mensajes_servicio_elem = ET.SubElement(servicio_elem, "mensajes")
+            ET.SubElement(mensajes_servicio_elem, "total").text = str(data["total"])
+            ET.SubElement(mensajes_servicio_elem, "positivos").text = str(data["positivos"])
+            ET.SubElement(mensajes_servicio_elem, "negativos").text = str(data["negativos"])
+            ET.SubElement(mensajes_servicio_elem, "neutros").text = str(data["neutros"])
+
+    return ET.ElementTree(root)

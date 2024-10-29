@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, Response
 from flask_cors import CORS
 from leerarchivo import leerarchivo
-from respuesta import filtrar_por_fecha,filtrar_por_fecha_y_empresa,guardar_xml
+from respuesta import filtrar_por_fecha,filtrar_por_fecha_y_empresa,guardar_xml,filtrar_por_rango_fechas,filtrar_por_rango_fechas_y_empresa
 
 app = Flask(__name__)
 CORS(app)  # Permitir CORS desde cualquier origen
@@ -102,5 +102,58 @@ def obtener_ff():
         print(f"Error al leer el archivo resumen: {e}")
         return jsonify({'mensaje': 'Error al leer el archivo resumen'}), 500
 
+@app.route('/api/filtrar_rango', methods=['POST'])
+def filtrar_rango():
+    # Obtener valores de fecha de inicio, fecha de fin y empresa desde el formulario
+    fecha_inicio = request.form.get('fecha_inicio')
+    fecha_fin = request.form.get('fecha_fin')
+    empresa = request.form.get('empresa')
+    
+    # Verificación de datos en el backend
+    print("Fecha de inicio recibida:", fecha_inicio)
+    print("Fecha de fin recibida:", fecha_fin)
+    print("Empresa recibida:", empresa)
+    
+    # Verificar que ambas fechas estén presentes
+    if not fecha_inicio or not fecha_fin:
+        print("Error: Ambas fechas son requeridas")
+        return jsonify({"error": "Ambas fechas son requeridas"}), 400
+
+    try:
+        # Filtrado solo por rango de fechas
+        if not empresa:
+            print("Realizando filtrado solo por rango de fechas")
+            resultados = filtrar_por_rango_fechas(fecha_inicio, fecha_fin)
+            if resultados is None:
+                return jsonify({"error": "No se encontraron resultados para el rango de fechas especificado."}), 404
+            guardar_xml(resultados, "rango_filter.xml")
+        
+        # Filtrado por rango de fechas y empresa
+        else:
+            print("Realizando filtrado por rango de fechas y empresa")
+            resultados = filtrar_por_rango_fechas_y_empresa(fecha_inicio, fecha_fin, empresa)
+            
+            if resultados is None:
+                return jsonify({"error": "No se encontraron resultados para el rango de fechas y empresa especificados."}), 404
+            guardar_xml(resultados, "rango_filter.xml")
+    
+    except Exception as e:
+        print(f"Error en la función de filtrado de rango: {e}")
+        return jsonify({"error": "Se encontró un error al procesar la solicitud."}), 500
+    
+    # Responder con éxito
+    return jsonify({"mensaje": "Archivo filtrado por rango creado correctamente."}), 200
+
+@app.route('/api/rango_filter', methods=['GET'])
+def obtener_rango_filter():
+    try:
+        with open('rango_filter.xml', 'r', encoding='utf-8') as f:
+            contenido = f.read()
+        return Response(contenido, mimetype='application/xml'), 200
+    except FileNotFoundError:
+        return jsonify({'mensaje': 'El archivo resumen no fue encontrado'}), 404
+    except Exception as e:
+        print(f"Error al leer el archivo resumen: {e}")
+        return jsonify({'mensaje': 'Error al leer el archivo resumen'}), 500
 if __name__ == '__main__':
     app.run(debug=True)

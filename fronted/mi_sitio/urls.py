@@ -24,4 +24,8 @@ urlpatterns = [
     path('cargar/', views.cargar_archivo, name='cargar'),
     path('peticiones/', views.peticiones, name='peticiones'),
     path('ayuda/', views.ayuda, name='ayuda'),
+     path('ver_datos/', views.ver_datos, name='ver_datos'),
+    path('filtrar_fecha/', views.filtrar_fecha, name='filtrar_fecha'),
+    path('filtrar_rango/', views.filtrar_rango, name='filtrar_rango'),
+    path('ver_mensajes/', views.ver_mensajes, name='ver_mensajes'),
 ]

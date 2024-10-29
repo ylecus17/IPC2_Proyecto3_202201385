@@ -45,6 +45,24 @@ def cargar_archivo(request):
         'contenido_resumen': contenido_resumen,  # Contenido del archivo resumen
     })
 def peticiones(request):
+    return render(request, 'peticiones.html')
+
+def ver_datos(request):
+    mensaje = ''
+    contenido_resumen = ''
+
+    try:
+        response = requests.get('http://127.0.0.1:5000/api/ver_datos')
+        if response.status_code == 200:
+            contenido_resumen = response.content.decode('utf-8')
+        else:
+            mensaje = 'Error al obtener los datos'
+    except Exception as e:
+        mensaje = f'Error al conectar con el backend: {e}'
+
+    return render(request, 'ver_datos.html', {'mensaje': mensaje, 'contenido_resumen': contenido_resumen})
+
+def filtrar_fecha(request):
     mensaje = ''
     contenido_resumen = ''
 
@@ -53,31 +71,66 @@ def peticiones(request):
         empresa = request.POST.get('empresa')
 
         try:
-            # Filtrar datos y obtener el resumen
             response = requests.post(
                 'http://127.0.0.1:5000/api/filtrar_resumen',
                 data={'fecha': fecha, 'empresa': empresa}
             )
-
             if response.status_code == 200:
-                # Si se crea correctamente, ahora se obtiene el archivo XML
                 response_xml = requests.get('http://127.0.0.1:5000/api/fecha_filter')
-                
                 if response_xml.status_code == 200:
-                    contenido_resumen = response_xml.content.decode('utf-8')  # Decodificar el contenido
+                    contenido_resumen = response_xml.content.decode('utf-8')
                 else:
                     mensaje = 'Error al obtener el archivo filtrado'
             else:
                 mensaje = 'Error al filtrar los resultados'
-
         except Exception as e:
             mensaje = f'Error al conectar con el backend: {e}'
 
-    return render(request, 'peticiones.html', {
-        'mensaje': mensaje,
-        'contenido_resumen': contenido_resumen,  # Contenido del archivo filtrado o mensaje de error
-    })
+    return render(request, 'filtrar_fecha.html', {'mensaje': mensaje, 'contenido_resumen': contenido_resumen})
 
+def filtrar_rango(request):
+    mensaje = ''
+    contenido_resumen = ''
 
+    if request.method == 'POST':
+        fecha_inicio = request.POST.get('fecha_inicio')
+        fecha_fin = request.POST.get('fecha_fin')
+        empresa = request.POST.get('empresa')
+
+        try:
+            # Enviar la solicitud POST al backend de Flask
+            response = requests.post(
+                'http://127.0.0.1:5000/api/filtrar_rango',
+                data={'fecha_inicio': fecha_inicio, 'fecha_fin': fecha_fin, 'empresa': empresa}
+            )
+
+            if response.status_code == 200:
+                # Solicitar el archivo XML filtrado
+                response_xml = requests.get('http://127.0.0.1:5000/api/rango_filter')
+                
+                if response_xml.status_code == 200:
+                    contenido_resumen = response_xml.content.decode('utf-8')
+                else:
+                    mensaje = 'Error al obtener el archivo filtrado'
+            else:
+                mensaje = 'Error al filtrar los resultados'
+        except Exception as e:
+            mensaje = f'Error al conectar con el backend: {e}'
+
+    return render(request, 'filtrar_rango.html', {'mensaje': mensaje, 'contenido_resumen': contenido_resumen})
+def ver_mensajes(request):
+    mensaje = ''
+    contenido_resumen = ''
+
+    try:
+        response = requests.get('http://127.0.0.1:5000/api/ver_mensajes')
+        if response.status_code == 200:
+            contenido_resumen = response.content.decode('utf-8')
+        else:
+            mensaje = 'Error al obtener los mensajes'
+    except Exception as e:
+        mensaje = f'Error al conectar con el backend: {e}'
+
+    return render(request, 'ver_mensajes.html', {'mensaje': mensaje, 'contenido_resumen': contenido_resumen})
 def ayuda(request):
     return render(request, 'ayuda.html')

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Filtrar por Rango de Fechas</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'style.css' %}">
+</head>
+<body>
+    {% include 'navbar.html' %}
+    
+    <h1>Filtrar por Rango de Fechas</h1>
+    <p>Aquí puedes filtrar el resumen de peticiones en un rango de fechas.</p>
+
+    <form method="POST">
+        {% csrf_token %}
+        <label for="fecha_inicio">Fecha de Inicio:</label>
+        <input type="date" id="fecha_inicio" name="fecha_inicio" required>
+
+        <label for="fecha_fin">Fecha de Fin:</label>
+        <input type="date" id="fecha_fin" name="fecha_fin" required>
+
+        <label for="empresa">Empresa (opcional):</label>
+        <input type="text" id="empresa" name="empresa" placeholder="Nombre de la empresa (opcional)">
+
+        <button type="submit">Consultar Resumen</button>
+    </form>
+
+    <div>
+        <h3>Resultado:</h3>
+        <textarea id="resultadoResumen" rows="10" cols="50" readonly>
+            {% if mensaje %}{{ mensaje }}{% endif %}
+            {% if contenido_resumen %}{{ contenido_resumen }}{% endif %}
+        </textarea>
+    </div>
+</body>
+</html>

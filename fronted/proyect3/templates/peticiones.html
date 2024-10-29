@@ -13,28 +13,22 @@
     <h1>Peticiones</h1>
     <p>Aquí puedes realizar y ver las peticiones realizadas.</p>
 
-    <form method="POST">
-        {% csrf_token %}
-        <label for="fecha">Fecha:</label>
-        <input type="date" id="fecha" name="fecha" required>
-
-        <label for="empresa">Empresa (opcional):</label>
-        <input type="text" id="empresa" name="empresa" placeholder="Nombre de la empresa (opcional)">
-
-        <button type="submit">Consultar Resumen</button>
-    </form>
-
-    <div>
-        <h3>Resultado:</h3>
-        <textarea id="resultadoResumen" rows="10" cols="50" readonly>
-            {% if mensaje %}
-            {{ mensaje }}
-            {% endif %}
-
-            {% if contenido_resumen %}
-            {{ contenido_resumen }}
-            {% endif %}
-        </textarea>
+    <!-- Botones de acciones -->
+    <div id="button-pet">
+        <form action="{% url 'ver_datos' %}" method="get">
+            <button type="submit" class="action-button">Ver Datos</button>
+        </form>
+        <form action="{% url 'filtrar_fecha' %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="action-button">Filtrar por Fecha</button>
+        </form>
+        <form action="{% url 'filtrar_rango' %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="action-button">Filtrar por Rango</button>
+        </form>
+        <form action="{% url 'ver_mensajes' %}" method="get">
+            <button type="submit" class="action-button">Ver Mensajes</button>
+        </form>
     </div>
 </body>
 </html>
