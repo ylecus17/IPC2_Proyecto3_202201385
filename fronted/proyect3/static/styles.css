@@ -45,8 +45,7 @@ p {
     padding: 10px;
     border-radius: 10px; 
     padding-left: 10px;
-}
-#uploadContainer {
+}#uploadContainer {
     display: flex;
     justify-content: space-between;
     margin: 40px;
@@ -73,23 +72,49 @@ p {
     padding: 10px;
 }
 
-#fileContent {
-    width: 40%;
-    height: 300px;
-    margin-left: 40px;
+.textareas-container {
+    display: flex; /* Usar flexbox para alinear los textarea */
+    justify-content: space-between; /* Espacio entre los textarea */
+    width: 100%; /* Asegúrate de que el contenedor ocupe el ancho completo */
+}
+
+#fileContent, #resumenContent {
+    width: 48%; /* Ajusta el ancho para que quepan uno al lado del otro */
+    height: 300px; /* Altura fija */
+    margin: 0 10px; /* Espacio entre los textarea */
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.3); /* Sombra */
+}
+
+#resultContainer {
+    width: 90%; /* Ajusta el ancho del contenedor de resultados */
+    margin-left: auto; /* Centrar el contenedor */
+    margin-right: auto; /* Centrar el contenedor */
     margin-bottom: 30px;
     padding: 10px;
     border-radius: 10px;
     border: 1px solid #ccc;
     box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.3); /* Sombra */
 }
-#resultContainer{
-    width: 40%;
-    height: 300px;
-    margin-left: 40px;
+#resultadoResumen{
+    width: 90%; /* Ajusta el ancho del contenedor de resultados */
+    margin-left: 40px; /* Centrar el contenedor */
+    margin-right: auto; /* Centrar el contenedor */
     margin-bottom: 30px;
     padding: 10px;
     border-radius: 10px;
     border: 1px solid #ccc;
     box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.3); /* Sombra */
+}
+#pet_fecha{
+    
+    justify-content: space-between;
+    margin: 40px;
+    color: #f5e6f4;
+    background-color: #b19ab0;
+    padding: 10px;
+    border-radius: 10px; 
+    padding-left: 10px;
 }

@@ -22,11 +22,21 @@
     <div id="resultContainer">
         <p>{{ mensaje }}</p>
         
-        {% if contenido_archivo %}
-            <h3>Contenido del Archivo XML:</h3>
-            <textarea id="fileContent" placeholder="Aquí se mostrará el contenido del archivo" readonly >
+        {% if contenido_archivo or contenido_resumen %}
+            <h3>Contenido del Archivo:</h3>
+            <div class="textareas-container">
+                {% if contenido_archivo %}
+                    <textarea id="fileContent" placeholder="Aquí se mostrará el contenido del archivo original" readonly>
 {{ contenido_archivo }}
-            </textarea>
+                    </textarea>
+                {% endif %}
+
+                {% if contenido_resumen %}
+                    <textarea id="resumenContent" placeholder="Aquí se mostrará el contenido del archivo resumen" readonly>
+{{ contenido_resumen }}
+                    </textarea>
+                {% endif %}
+            </div>
         {% endif %}
     </div>
 </body>
