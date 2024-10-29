@@ -155,5 +155,10 @@ def obtener_rango_filter():
     except Exception as e:
         print(f"Error al leer el archivo resumen: {e}")
         return jsonify({'mensaje': 'Error al leer el archivo resumen'}), 500
+    
+@app.route('/generar_datos', methods=['GET'])
+def generar_datos():
+    contenido = generar_txt()  # Llama a la función para generar el archivo
+    return contenido
 if __name__ == '__main__':
     app.run(debug=True)

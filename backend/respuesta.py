@@ -572,3 +572,58 @@ def filtrar_por_rango_fechas_y_empresa(fecha_inicio, fecha_fin, empresa_nombre):
             ET.SubElement(mensajes_servicio_elem, "neutros").text = str(data["neutros"])
 
     return ET.ElementTree(root)
+
+def procesar_mensaje(xml_input):
+    try:
+        # Dividir el mensaje en líneas
+        lineas = xml_input.strip().split('\n')
+
+        # Inicializar el diccionario para almacenar la información extraída
+        informacion = {}
+
+        # Extraer información del mensaje
+        lugar_fecha_str = lineas[0].split(': ')[1].strip()  # "Lugar y fecha: Guatemala,"
+        lugar, datetime_str = lugar_fecha_str.split(', ')  # "Guatemala" y "01/04/2022 15:20"
+        fecha, hora = datetime_str.split(' ')  # "01/04/2022" y "15:20"
+
+        informacion['lugar'] = lugar
+        informacion['fecha'] = fecha
+        informacion['hora'] = hora
+        informacion['usuario'] = lineas[1].split(': ')[1].strip()  # "Usuario: map0002@usac.edu"
+        informacion['red_social'] = lineas[2].split(': ')[1].strip()  # "Red social: Facebook"
+        informacion['texto'] = lineas[3].strip()  # Texto del mensaje
+
+        return informacion
+
+    except Exception as e:
+        print(f"Error al extraer información: {e}")
+        return None  # Retornar None si hay un error
+    
+def generar_txt():
+    contenido = "Datos Generados:\n\n"
+    
+    # Guardar palabras positivas y negativas
+    contenido += "Palabras Positivas:\n" + "\n".join(positivos) + "\n\n"
+    contenido += "Palabras Negativas:\n" + "\n".join(negativos) + "\n\n"
+    
+    # Guardar empresas y sus servicios
+    contenido += "Empresas y sus servicios:\n"
+    for empresa in empresas:
+        contenido += f"Empresa: {empresa.nombre}\n"
+        for servicio in empresa.servicios:
+            contenido += f"  Servicio: {servicio.nombre}\n"
+            contenido += f"    Aliases: {servicio.alias}\n"
+
+    # Guardar mensajes procesados
+    contenido += "\nMensajes Procesados:\n"
+    for mensaje in mensajes:
+        contenido += f"Lugar: {mensaje.lugar}\n"
+        contenido += f"Fecha: {mensaje.fecha}\n"
+        contenido += f"Hora: {mensaje.hora}\n"
+        contenido += f"Usuario: {mensaje.usuario}\n"
+        contenido += f"Red social: {mensaje.red_social}\n"
+        contenido += f"Mensaje: {mensaje.contenido}\n\n"
+
+    # Guardar el contenido en un archivo
+    with open('datos.txt', 'w') as file:
+        file.write(contenido)

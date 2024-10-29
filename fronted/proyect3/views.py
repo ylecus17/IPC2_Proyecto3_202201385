@@ -46,21 +46,15 @@ def cargar_archivo(request):
     })
 def peticiones(request):
     return render(request, 'peticiones.html')
-
 def ver_datos(request):
-    mensaje = ''
-    contenido_resumen = ''
-
+    # Realiza una solicitud GET al backend de Flask
     try:
-        response = requests.get('http://127.0.0.1:5000/api/ver_datos')
-        if response.status_code == 200:
-            contenido_resumen = response.content.decode('utf-8')
-        else:
-            mensaje = 'Error al obtener los datos'
-    except Exception as e:
-        mensaje = f'Error al conectar con el backend: {e}'
+        response = requests.get('http://localhost:5000/generar_datos')
+        datos = response.text  # Obtén los datos generados por Flask
+    except requests.exceptions.RequestException as e:
+        datos = f"Error al obtener datos: {e}"
 
-    return render(request, 'ver_datos.html', {'mensaje': mensaje, 'contenido_resumen': contenido_resumen})
+    return render(request, 'ver_datos.html', {'datos': datos})
 
 def filtrar_fecha(request):
     mensaje = ''
@@ -119,18 +113,23 @@ def filtrar_rango(request):
 
     return render(request, 'filtrar_rango.html', {'mensaje': mensaje, 'contenido_resumen': contenido_resumen})
 def ver_mensajes(request):
-    mensaje = ''
-    contenido_resumen = ''
+    if request.method == 'POST':
+        xml_input = request.POST.get('mensaje', '')
+        api_url = 'http://localhost:5000/estudiar_mensaje'  # Cambia esta URL si es necesario
 
-    try:
-        response = requests.get('http://127.0.0.1:5000/api/ver_mensajes')
+        # Enviar el mensaje al backend de la API
+        response = requests.post(api_url, data=xml_input)
+
         if response.status_code == 200:
-            contenido_resumen = response.content.decode('utf-8')
+            # Asumimos que la respuesta es texto plano
+            resultado = response.text
         else:
-            mensaje = 'Error al obtener los mensajes'
-    except Exception as e:
-        mensaje = f'Error al conectar con el backend: {e}'
+            resultado = 'Error al comunicarse con la API.'
 
-    return render(request, 'ver_mensajes.html', {'mensaje': mensaje, 'contenido_resumen': contenido_resumen})
+        return render(request, 'ver_mensajes.html', {'resultado': resultado})
+    
+    return render(request, 'ver_mensajes.html', {'resultado': 'Método no permitido.'})
+
+    
 def ayuda(request):
     return render(request, 'ayuda.html')

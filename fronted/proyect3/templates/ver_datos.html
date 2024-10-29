@@ -1,40 +1,20 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ver datos</title>
-    {% load static %}
-    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <title>Generar Datos</title>
+    {% load static %}  <!-- Cargar archivos estáticos -->
+    <link rel="stylesheet" href="{% static 'style.css' %}">  <!-- Enlazar CSS -->
 </head>
 <body>
     {% include 'navbar.html' %}
-    
-    <h1>Peticiones</h1>
-    <p>Aquí puedes realizar y ver las peticiones realizadas.</p>
+   
 
-    <form method="POST">
-        {% csrf_token %}
-        <label for="fecha">Fecha:</label>
-        <input type="date" id="fecha" name="fecha" required>
-
-        <label for="empresa">Empresa (opcional):</label>
-        <input type="text" id="empresa" name="empresa" placeholder="Nombre de la empresa (opcional)">
-
-        <button type="submit">Consultar Resumen</button>
-    </form>
-
-    <div>
-        <h3>Resultado:</h3>
-        <textarea id="resultadoResumen" rows="10" cols="50" readonly>
-            {% if mensaje %}
-            {{ mensaje }}
-            {% endif %}
-
-            {% if contenido_resumen %}
-            {{ contenido_resumen }}
-            {% endif %}
-        </textarea>
+    <!-- Área de texto -->
+    <div class="container mt-4">
+        <h2>Datos Generados</h2>
+        <textarea id="dataArea" class="form-control" rows="10" placeholder="Aquí se mostrarán los datos generados..." readonly></textarea>
     </div>
 </body>
 </html>
